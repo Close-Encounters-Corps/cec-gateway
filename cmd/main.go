@@ -74,20 +74,24 @@ func main() {
 				log.Println(err)
 				return auth.NewLoginDiscordInternalServerError()
 			}
-			return auth.NewLoginDiscordOK().WithPayload(&models.AuthPhaseResult{
-				NextURL: out.NextURL,
-				Token:   out.Token,
-				Phase:   out.Phase,
-				User: &models.User{
-					ID: out.User.ID,
-					Principal: &models.Principal{
+			user := models.User{}
+			if out.User != nil {
+				user.ID = out.User.ID
+				if out.User.Principal != nil {
+					user.Principal = &models.Principal{
 						ID:        out.User.Principal.ID,
 						Admin:     out.User.Principal.Admin,
 						LastLogin: out.User.Principal.LastLogin,
 						CreatedOn: out.User.Principal.CreatedOn,
 						State:     out.User.Principal.State,
-					},
-				},
+					}
+				}
+			}
+			return auth.NewLoginDiscordOK().WithPayload(&models.AuthPhaseResult{
+				NextURL: out.NextURL,
+				Token:   out.Token,
+				Phase:   out.Phase,
+				User:    &user,
 			})
 		},
 	)

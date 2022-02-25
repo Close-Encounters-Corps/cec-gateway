@@ -12,3 +12,7 @@ Close Encounters Corps Gateway
 ### If you change swagger.yaml
 
 `swagger generate server -t gen -f swagger.yaml --exclude-main -A cec-gw`
+
+## Usage
+
+Just open in your browser `/api/docs`. 
