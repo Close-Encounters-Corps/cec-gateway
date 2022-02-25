@@ -1,0 +1,39 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}"
+  labels:
+    tier: frontend
+    app: gateway
+    release: "{{ .Release.Name }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: frontend
+      app: gateway
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        tier: frontend
+        app: gateway
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: gateway
+        image: "{{ .Values.image.name }}"
+        imagePullPolicy: Always
+        ports:
+          - name: http
+            containerPort: 8080
+        env:
+          - name: TZ
+            value: Europe/Moscow
+          - name: CEC_URLS_CORE
+            value: "{{ .Values.gw.urls.core }}"
+          - name: CEC_LISTENPORT
+            value: "8080"
+      imagePullSecrets:
+        - name: "{{ .Values.image.secret }}"

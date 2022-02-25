@@ -1,0 +1,90 @@
+---
+swagger: "2.0"
+info:
+  description: |
+    Gateway endpoint of a CEC Platform v2, serves as a proxy and one swagger to rule them all. 
+    Find more at Close Encounters Corps Discord server!
+  version: "0.1.0"
+  title: "CEC Gateway"
+basePath: /api
+tags:
+- name: private
+  description: Private API. Do not use!
+paths:
+  /0/login/discord:
+    get:
+      tags:
+      - private
+      summary: "Authenticate using Discord"
+      operationId: "loginDiscord"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "state"
+        type: "string"
+        description: "Second phase: State to fetch from CEC Auth"
+        required: false
+      responses:
+        "500":
+          description: "Internal error"
+        "200":
+          description: "Phase successful"
+          schema:
+            type: string
+            $ref: "#/definitions/AuthPhaseResult"
+  /0/users/current:
+    get:
+      tags:
+      - private
+      summary: Get current user
+      operationId: currentUser
+      produces:
+      - application/json
+      parameters:
+      - in: header
+        name: x-auth-token
+        required: true
+        type: string
+        description: Token got from /login
+      responses:
+        "200":
+          description: "User found"
+          schema:
+            type: string
+            $ref: "#/definitions/User"
+definitions:
+  AuthPhaseResult:
+    type: object
+    properties:
+      phase:
+        type: integer
+        format: int32
+      next_url:
+        type: string
+      token:
+        type: string
+      user:
+        $ref: "#/definitions/User"
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      principal:
+        $ref: "#/definitions/Principal"
+  Principal:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      admin:
+        type: boolean
+      created_on:
+        type: string
+      last_login:
+        type: string
+      state:
+        type: string

@@ -1,0 +1,8 @@
+gw:
+  urls:
+    core: http://cec-core
+image: 
+  name: ghcr.io/close-encounters-corps/cec-gateway:main
+  secret: ghcr
+ingress:
+  host: closeencounterscorps.org
