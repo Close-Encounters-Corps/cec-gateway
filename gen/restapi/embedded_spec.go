@@ -48,12 +48,14 @@ func init() {
           "200": {
             "description": "Phase successful",
             "schema": {
-              "type": "string",
               "$ref": "#/definitions/AuthPhaseResult"
             }
           },
           "500": {
-            "description": "Internal error"
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -105,6 +107,14 @@ func init() {
         },
         "user": {
           "$ref": "#/definitions/User"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
         }
       }
     },
@@ -180,12 +190,14 @@ func init() {
           "200": {
             "description": "Phase successful",
             "schema": {
-              "type": "string",
               "$ref": "#/definitions/AuthPhaseResult"
             }
           },
           "500": {
-            "description": "Internal error"
+            "description": "Internal error",
+            "schema": {
+              "$ref": "#/definitions/Error"
+            }
           }
         }
       }
@@ -237,6 +249,14 @@ func init() {
         },
         "user": {
           "$ref": "#/definitions/User"
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "properties": {
+        "request_id": {
+          "type": "string"
         }
       }
     },

@@ -1,9 +1,11 @@
 package config
 
 type Config struct {
-	Urls *UrlSet
+	JaegerUrl string
+	Urls      *UrlSet
 }
 
 type UrlSet struct {
-	Core string
+	External string
+	Core     string
 }

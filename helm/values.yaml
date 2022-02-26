@@ -1,8 +1,12 @@
 gw:
+  env: dev
   urls:
     core: http://cec-core
-image: 
+    external: http://closeencounterscorps.org
+image:
   name: ghcr.io/close-encounters-corps/cec-gateway:main
   secret: ghcr
 ingress:
   host: closeencounterscorps.org
+jaeger:
+  url: "http://tracing.closeencounterscorps.org:14268/api/traces"

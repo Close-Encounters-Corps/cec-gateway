@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -14,12 +16,14 @@ import (
 	"github.com/Close-Encounters-Corps/cec-gateway/gen/models"
 	"github.com/Close-Encounters-Corps/cec-gateway/gen/restapi"
 	"github.com/Close-Encounters-Corps/cec-gateway/gen/restapi/operations"
-	"github.com/Close-Encounters-Corps/cec-gateway/gen/restapi/operations/auth"
 	"github.com/Close-Encounters-Corps/cec-gateway/gen/restapi/operations/private"
 	"github.com/Close-Encounters-Corps/cec-gateway/pkg/config"
+	"github.com/Close-Encounters-Corps/cec-gateway/pkg/gateway"
+	"github.com/Close-Encounters-Corps/cec-gateway/pkg/util"
 	"github.com/go-openapi/loads"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 var COMMITSHA string
@@ -27,8 +31,10 @@ var COMMITSHA string
 func main() {
 	log.Println("Commit:", COMMITSHA)
 	cfg := config.Config{
+		JaegerUrl: requireEnv("CEC_JAEGER"),
 		Urls: &config.UrlSet{
-			Core: requireEnv("CEC_URLS_CORE"),
+			External: requireEnv("CEC_URLS_EXTERNAL"),
+			Core:     requireEnv("CEC_URLS_CORE"),
 		},
 	}
 	listenport := requireEnv("CEC_LISTENPORT")
@@ -36,48 +42,75 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	app := gateway.Gateway{
+		Cfg:         &cfg,
+		Environment: requireEnv("CEC_ENVIRONMENT"),
+		Client: &http.Client{
+			Timeout:   1 * time.Second,
+			Transport: otelhttp.NewTransport(http.DefaultTransport),
+		},
+	}
+	app.SetupAll()
+	defer app.Close(context.Background())
 	swagger, err := loads.Analyzed(restapi.SwaggerJSON, "")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	client := http.Client{
-		Timeout: 1 * time.Second,
-	}
 	api := operations.NewCecGwAPI(swagger)
-	api.AuthLoginDiscordHandler = auth.LoginDiscordHandlerFunc(
-		func(ldp auth.LoginDiscordParams) middleware.Responder {
+	api.PrivateLoginDiscordHandler = private.LoginDiscordHandlerFunc(
+		func(ldp private.LoginDiscordParams) middleware.Responder {
+			ctx, span := gateway.NewSpan(ldp.HTTPRequest.Context(), "controller.login.discord", nil)
+			defer span.End()
+			internalError := func(err error) middleware.Responder {
+				gateway.AddSpanError(span, err)
+				gateway.FailSpan(span, "internal error")
+				return private.NewLoginDiscordInternalServerError().WithPayload(&models.Error{
+					RequestID: span.SpanContext().TraceID().String(),
+				})
+			}
 			state := swag.StringValue(ldp.State)
-			u, err := url.Parse(cfg.Urls.Core)
+			gateway.AddSpanTags(span, map[string]string{"request.state": state})
+			u, err := url.Parse(cfg.Urls.External)
 			if err != nil {
-				log.Println(err)
-				return auth.NewLoginDiscordInternalServerError()
+				return internalError(err)
 			}
-			u.Query().Add("state", state)
-			req, err := http.NewRequest("GET", u.String(), nil)
+			u.Path = ldp.HTTPRequest.URL.String()
+			req, err := util.V1LoginDiscordRequest(
+				ctx,
+				cfg.Urls.Core,
+				"/v1/login/discord",
+				u.String(),
+				state,
+			)
 			if err != nil {
-				log.Println(err)
-				return auth.NewLoginDiscordInternalServerError()
+				return internalError(err)
 			}
-			resp, err := client.Do(req)
+			span.AddEvent("making request")
+			resp, err := app.Client.Do(req)
+			span.AddEvent("request done")
 			if err != nil {
-				log.Println(err)
-				return auth.NewLoginDiscordInternalServerError()
+				return internalError(err)
 			}
+			gateway.AddSpanTags(span, map[string]string{"response.status": fmt.Sprint(resp.StatusCode)})
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
-				log.Println(err)
-				return auth.NewLoginDiscordInternalServerError()
+				return internalError(err)
 			}
+			log.Println(string(body))
 			var out core_models.AuthPhaseResult
 			err = json.Unmarshal(body, &out)
+
 			if err != nil {
-				log.Println(err)
-				return auth.NewLoginDiscordInternalServerError()
+				gateway.AddSpanTags(span, map[string]string{"response.body": string(body)})
+				return internalError(err)
 			}
-			user := models.User{}
+			var user *models.User = nil
 			if out.User != nil {
+				user = &models.User{}
 				user.ID = out.User.ID
 				if out.User.Principal != nil {
+					pid := out.User.Principal.ID
+					gateway.AddSpanEvents(span, "user.created", map[string]string{"principal.id": fmt.Sprint(pid)})
 					user.Principal = &models.Principal{
 						ID:        out.User.Principal.ID,
 						Admin:     out.User.Principal.Admin,
@@ -87,11 +120,12 @@ func main() {
 					}
 				}
 			}
-			return auth.NewLoginDiscordOK().WithPayload(&models.AuthPhaseResult{
+			gateway.AddSpanTags(span, map[string]string{"login.phase": fmt.Sprint(out.Phase)})
+			return private.NewLoginDiscordOK().WithPayload(&models.AuthPhaseResult{
 				NextURL: out.NextURL,
 				Token:   out.Token,
 				Phase:   out.Phase,
-				User:    &user,
+				User:    user,
 			})
 		},
 	)

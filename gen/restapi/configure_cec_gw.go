@@ -11,7 +11,6 @@ import (
 	"github.com/go-openapi/runtime/middleware"
 
 	"github.com/Close-Encounters-Corps/cec-gateway/gen/restapi/operations"
-	"github.com/Close-Encounters-Corps/cec-gateway/gen/restapi/operations/auth"
 	"github.com/Close-Encounters-Corps/cec-gateway/gen/restapi/operations/private"
 )
 
@@ -44,9 +43,9 @@ func configureAPI(api *operations.CecGwAPI) http.Handler {
 			return middleware.NotImplemented("operation private.CurrentUser has not yet been implemented")
 		})
 	}
-	if api.AuthLoginDiscordHandler == nil {
-		api.AuthLoginDiscordHandler = auth.LoginDiscordHandlerFunc(func(params auth.LoginDiscordParams) middleware.Responder {
-			return middleware.NotImplemented("operation auth.LoginDiscord has not yet been implemented")
+	if api.PrivateLoginDiscordHandler == nil {
+		api.PrivateLoginDiscordHandler = private.LoginDiscordHandlerFunc(func(params private.LoginDiscordParams) middleware.Responder {
+			return middleware.NotImplemented("operation private.LoginDiscord has not yet been implemented")
 		})
 	}
 

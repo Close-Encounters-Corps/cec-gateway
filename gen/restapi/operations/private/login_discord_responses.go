@@ -65,6 +65,11 @@ const LoginDiscordInternalServerErrorCode int = 500
 swagger:response loginDiscordInternalServerError
 */
 type LoginDiscordInternalServerError struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
 }
 
 // NewLoginDiscordInternalServerError creates LoginDiscordInternalServerError with default headers values
@@ -73,10 +78,25 @@ func NewLoginDiscordInternalServerError() *LoginDiscordInternalServerError {
 	return &LoginDiscordInternalServerError{}
 }
 
+// WithPayload adds the payload to the login discord internal server error response
+func (o *LoginDiscordInternalServerError) WithPayload(payload *models.Error) *LoginDiscordInternalServerError {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the login discord internal server error response
+func (o *LoginDiscordInternalServerError) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
 // WriteResponse to the client
 func (o *LoginDiscordInternalServerError) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
-	rw.Header().Del(runtime.HeaderContentType) //Remove Content-Type on empty responses
-
 	rw.WriteHeader(500)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
 }

@@ -28,10 +28,11 @@ paths:
       responses:
         "500":
           description: "Internal error"
+          schema:
+            $ref: "#/definitions/Error"
         "200":
           description: "Phase successful"
           schema:
-            type: string
             $ref: "#/definitions/AuthPhaseResult"
   /0/users/current:
     get:
@@ -54,6 +55,11 @@ paths:
             type: string
             $ref: "#/definitions/User"
 definitions:
+  Error:
+    type: object
+    properties:
+      request_id:
+        type: string
   AuthPhaseResult:
     type: object
     properties:

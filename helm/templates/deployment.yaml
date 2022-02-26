@@ -31,8 +31,14 @@ spec:
         env:
           - name: TZ
             value: Europe/Moscow
+          - name: CEC_ENVIRONMENT
+            value: "{{ .Values.gw.env }}"
+          - name: CEC_JAEGER
+            value: "{{ .Values.jaeger.url }}"
           - name: CEC_URLS_CORE
             value: "{{ .Values.gw.urls.core }}"
+          - name: CEC_URLS_EXTERNAL
+            value: "{{ .Values.gw.urls.external }}"
           - name: CEC_LISTENPORT
             value: "8080"
       imagePullSecrets:
