@@ -34,6 +34,14 @@ paths:
           description: "Phase successful"
           schema:
             $ref: "#/definitions/AuthPhaseResult"
+          headers:
+            X-Trace-Id:
+              type: string
+              description: Trace ID
+        "400":
+          description: "User input error"
+          schema:
+            $ref: "#/definitions/Error"
   /0/users/current:
     get:
       tags:
@@ -52,13 +60,18 @@ paths:
         "200":
           description: "User found"
           schema:
-            type: string
             $ref: "#/definitions/User"
+          headers:
+            X-Trace-Id:
+              type: string
+              description: Trace ID
 definitions:
   Error:
     type: object
     properties:
       request_id:
+        type: string
+      message:
         type: string
   AuthPhaseResult:
     type: object

@@ -21,6 +21,10 @@ const CurrentUserOKCode int = 200
 swagger:response currentUserOK
 */
 type CurrentUserOK struct {
+	/*Trace ID
+
+	 */
+	XTraceID string `json:"X-Trace-Id"`
 
 	/*
 	  In: Body
@@ -32,6 +36,17 @@ type CurrentUserOK struct {
 func NewCurrentUserOK() *CurrentUserOK {
 
 	return &CurrentUserOK{}
+}
+
+// WithXTraceID adds the xTraceId to the current user o k response
+func (o *CurrentUserOK) WithXTraceID(xTraceID string) *CurrentUserOK {
+	o.XTraceID = xTraceID
+	return o
+}
+
+// SetXTraceID sets the xTraceId to the current user o k response
+func (o *CurrentUserOK) SetXTraceID(xTraceID string) {
+	o.XTraceID = xTraceID
 }
 
 // WithPayload adds the payload to the current user o k response
@@ -47,6 +62,13 @@ func (o *CurrentUserOK) SetPayload(payload *models.User) {
 
 // WriteResponse to the client
 func (o *CurrentUserOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	// response header X-Trace-Id
+
+	xTraceID := o.XTraceID
+	if xTraceID != "" {
+		rw.Header().Set("X-Trace-Id", xTraceID)
+	}
 
 	rw.WriteHeader(200)
 	if o.Payload != nil {

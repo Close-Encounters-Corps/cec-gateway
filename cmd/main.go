@@ -60,12 +60,14 @@ func main() {
 	api.PrivateLoginDiscordHandler = private.LoginDiscordHandlerFunc(
 		func(ldp private.LoginDiscordParams) middleware.Responder {
 			ctx, span := gateway.NewSpan(ldp.HTTPRequest.Context(), "controller.login.discord", nil)
+			traceId := span.SpanContext().TraceID().String()
 			defer span.End()
 			internalError := func(err error) middleware.Responder {
 				gateway.AddSpanError(span, err)
 				gateway.FailSpan(span, "internal error")
+				log.Printf("[%s] error: %s", traceId, err)
 				return private.NewLoginDiscordInternalServerError().WithPayload(&models.Error{
-					RequestID: span.SpanContext().TraceID().String(),
+					RequestID: traceId,
 				})
 			}
 			state := swag.StringValue(ldp.State)
@@ -96,10 +98,25 @@ func main() {
 			if err != nil {
 				return internalError(err)
 			}
-			log.Println(string(body))
+			if resp.StatusCode != http.StatusOK {
+				gateway.AddSpanEvents(span, "non-OK response", map[string]string{"responde.body": string(body)})
+				if resp.StatusCode == http.StatusBadRequest {
+					var message models.Error
+					err := json.Unmarshal(body, &message)
+					if err != nil {
+						return internalError(err)
+					}
+					return private.NewLoginDiscordBadRequest().WithPayload(&models.Error{
+						Message:   message.Message,
+						RequestID: message.RequestID,
+					})
+				}
+				return private.NewLoginDiscordInternalServerError().WithPayload(&models.Error{
+					RequestID: traceId,
+				})
+			}
 			var out core_models.AuthPhaseResult
 			err = json.Unmarshal(body, &out)
-
 			if err != nil {
 				gateway.AddSpanTags(span, map[string]string{"response.body": string(body)})
 				return internalError(err)
@@ -126,7 +143,7 @@ func main() {
 				Token:   out.Token,
 				Phase:   out.Phase,
 				User:    user,
-			})
+			}).WithXTraceID(traceId)
 		},
 	)
 	api.PrivateCurrentUserHandler = private.CurrentUserHandlerFunc(

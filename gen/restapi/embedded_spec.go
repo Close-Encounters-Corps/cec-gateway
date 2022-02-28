@@ -49,6 +49,18 @@ func init() {
             "description": "Phase successful",
             "schema": {
               "$ref": "#/definitions/AuthPhaseResult"
+            },
+            "headers": {
+              "X-Trace-Id": {
+                "type": "string",
+                "description": "Trace ID"
+              }
+            }
+          },
+          "400": {
+            "description": "User input error",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "500": {
@@ -83,8 +95,13 @@ func init() {
           "200": {
             "description": "User found",
             "schema": {
-              "type": "string",
               "$ref": "#/definitions/User"
+            },
+            "headers": {
+              "X-Trace-Id": {
+                "type": "string",
+                "description": "Trace ID"
+              }
             }
           }
         }
@@ -113,6 +130,9 @@ func init() {
     "Error": {
       "type": "object",
       "properties": {
+        "message": {
+          "type": "string"
+        },
         "request_id": {
           "type": "string"
         }
@@ -191,6 +211,18 @@ func init() {
             "description": "Phase successful",
             "schema": {
               "$ref": "#/definitions/AuthPhaseResult"
+            },
+            "headers": {
+              "X-Trace-Id": {
+                "type": "string",
+                "description": "Trace ID"
+              }
+            }
+          },
+          "400": {
+            "description": "User input error",
+            "schema": {
+              "$ref": "#/definitions/Error"
             }
           },
           "500": {
@@ -225,8 +257,13 @@ func init() {
           "200": {
             "description": "User found",
             "schema": {
-              "type": "string",
               "$ref": "#/definitions/User"
+            },
+            "headers": {
+              "X-Trace-Id": {
+                "type": "string",
+                "description": "Trace ID"
+              }
             }
           }
         }
@@ -255,6 +292,9 @@ func init() {
     "Error": {
       "type": "object",
       "properties": {
+        "message": {
+          "type": "string"
+        },
         "request_id": {
           "type": "string"
         }

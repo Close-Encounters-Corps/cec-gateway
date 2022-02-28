@@ -21,6 +21,10 @@ const LoginDiscordOKCode int = 200
 swagger:response loginDiscordOK
 */
 type LoginDiscordOK struct {
+	/*Trace ID
+
+	 */
+	XTraceID string `json:"X-Trace-Id"`
 
 	/*
 	  In: Body
@@ -32,6 +36,17 @@ type LoginDiscordOK struct {
 func NewLoginDiscordOK() *LoginDiscordOK {
 
 	return &LoginDiscordOK{}
+}
+
+// WithXTraceID adds the xTraceId to the login discord o k response
+func (o *LoginDiscordOK) WithXTraceID(xTraceID string) *LoginDiscordOK {
+	o.XTraceID = xTraceID
+	return o
+}
+
+// SetXTraceID sets the xTraceId to the login discord o k response
+func (o *LoginDiscordOK) SetXTraceID(xTraceID string) {
+	o.XTraceID = xTraceID
 }
 
 // WithPayload adds the payload to the login discord o k response
@@ -48,7 +63,58 @@ func (o *LoginDiscordOK) SetPayload(payload *models.AuthPhaseResult) {
 // WriteResponse to the client
 func (o *LoginDiscordOK) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
 
+	// response header X-Trace-Id
+
+	xTraceID := o.XTraceID
+	if xTraceID != "" {
+		rw.Header().Set("X-Trace-Id", xTraceID)
+	}
+
 	rw.WriteHeader(200)
+	if o.Payload != nil {
+		payload := o.Payload
+		if err := producer.Produce(rw, payload); err != nil {
+			panic(err) // let the recovery middleware deal with this
+		}
+	}
+}
+
+// LoginDiscordBadRequestCode is the HTTP code returned for type LoginDiscordBadRequest
+const LoginDiscordBadRequestCode int = 400
+
+/*LoginDiscordBadRequest User input error
+
+swagger:response loginDiscordBadRequest
+*/
+type LoginDiscordBadRequest struct {
+
+	/*
+	  In: Body
+	*/
+	Payload *models.Error `json:"body,omitempty"`
+}
+
+// NewLoginDiscordBadRequest creates LoginDiscordBadRequest with default headers values
+func NewLoginDiscordBadRequest() *LoginDiscordBadRequest {
+
+	return &LoginDiscordBadRequest{}
+}
+
+// WithPayload adds the payload to the login discord bad request response
+func (o *LoginDiscordBadRequest) WithPayload(payload *models.Error) *LoginDiscordBadRequest {
+	o.Payload = payload
+	return o
+}
+
+// SetPayload sets the payload to the login discord bad request response
+func (o *LoginDiscordBadRequest) SetPayload(payload *models.Error) {
+	o.Payload = payload
+}
+
+// WriteResponse to the client
+func (o *LoginDiscordBadRequest) WriteResponse(rw http.ResponseWriter, producer runtime.Producer) {
+
+	rw.WriteHeader(400)
 	if o.Payload != nil {
 		payload := o.Payload
 		if err := producer.Produce(rw, payload); err != nil {
