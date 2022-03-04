@@ -25,6 +25,11 @@ paths:
         type: "string"
         description: "Second phase: State to fetch from CEC Auth"
         required: false
+      - in: "query"
+        name: redirect_url
+        type: string
+        description: URL to redirect on success
+        required: false
       responses:
         "500":
           description: "Internal error"

@@ -42,6 +42,12 @@ func init() {
             "description": "Second phase: State to fetch from CEC Auth",
             "name": "state",
             "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "URL to redirect on success",
+            "name": "redirect_url",
+            "in": "query"
           }
         ],
         "responses": {
@@ -203,6 +209,12 @@ func init() {
             "type": "string",
             "description": "Second phase: State to fetch from CEC Auth",
             "name": "state",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "URL to redirect on success",
+            "name": "redirect_url",
             "in": "query"
           }
         ],

@@ -13,7 +13,8 @@ import (
 
 // LoginDiscordURL generates an URL for the login discord operation
 type LoginDiscordURL struct {
-	State *string
+	RedirectURL *string
+	State       *string
 
 	_basePath string
 	// avoid unkeyed usage
@@ -48,6 +49,14 @@ func (o *LoginDiscordURL) Build() (*url.URL, error) {
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
 
 	qs := make(url.Values)
+
+	var redirectURLQ string
+	if o.RedirectURL != nil {
+		redirectURLQ = *o.RedirectURL
+	}
+	if redirectURLQ != "" {
+		qs.Set("redirect_url", redirectURLQ)
+	}
 
 	var stateQ string
 	if o.State != nil {

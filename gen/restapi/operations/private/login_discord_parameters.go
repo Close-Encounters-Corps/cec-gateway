@@ -31,6 +31,10 @@ type LoginDiscordParams struct {
 	// HTTP Request Object
 	HTTPRequest *http.Request `json:"-"`
 
+	/*URL to redirect on success
+	  In: query
+	*/
+	RedirectURL *string
 	/*Second phase: State to fetch from CEC Auth
 	  In: query
 	*/
@@ -48,6 +52,11 @@ func (o *LoginDiscordParams) BindRequest(r *http.Request, route *middleware.Matc
 
 	qs := runtime.Values(r.URL.Query())
 
+	qRedirectURL, qhkRedirectURL, _ := qs.GetOK("redirect_url")
+	if err := o.bindRedirectURL(qRedirectURL, qhkRedirectURL, route.Formats); err != nil {
+		res = append(res, err)
+	}
+
 	qState, qhkState, _ := qs.GetOK("state")
 	if err := o.bindState(qState, qhkState, route.Formats); err != nil {
 		res = append(res, err)
@@ -55,6 +64,24 @@ func (o *LoginDiscordParams) BindRequest(r *http.Request, route *middleware.Matc
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+// bindRedirectURL binds and validates parameter RedirectURL from query.
+func (o *LoginDiscordParams) bindRedirectURL(rawData []string, hasKey bool, formats strfmt.Registry) error {
+	var raw string
+	if len(rawData) > 0 {
+		raw = rawData[len(rawData)-1]
+	}
+
+	// Required: false
+	// AllowEmptyValue: false
+
+	if raw == "" { // empty values pass all other validations
+		return nil
+	}
+	o.RedirectURL = &raw
+
 	return nil
 }
 

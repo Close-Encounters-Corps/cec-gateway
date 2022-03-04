@@ -72,16 +72,15 @@ func main() {
 			}
 			state := swag.StringValue(ldp.State)
 			gateway.AddSpanTags(span, map[string]string{"request.state": state})
-			u, err := url.Parse(cfg.Urls.External)
-			if err != nil {
-				return internalError(err)
+			redirectUrl := cfg.Urls.External
+			if param := swag.StringValue(ldp.RedirectURL); param != "" {
+				redirectUrl = param
 			}
-			u.Path = ldp.HTTPRequest.URL.String()
 			req, err := util.V1LoginDiscordRequest(
 				ctx,
 				cfg.Urls.Core,
 				"/v1/login/discord",
-				u.String(),
+				redirectUrl,
 				state,
 			)
 			if err != nil {
