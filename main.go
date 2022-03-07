@@ -17,9 +17,9 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
-
+ 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -69,7 +69,7 @@ func main() {
 	api0.Use(otelgin.Middleware("api-0"))
 	api0.GET("/login/discord", authCtrl.LoginDiscord)
 	api0.GET("/users/current", princCtrl.GetCurrentUser)
-	r.GET("/api/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	r.GET("/api/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	if err := r.Run(fmt.Sprintf(":%d", port)); err != nil {
 		log.Fatalln(err)
 	}
