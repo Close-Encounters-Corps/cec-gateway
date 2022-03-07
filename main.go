@@ -19,7 +19,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
- 
+	
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 

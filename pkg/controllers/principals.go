@@ -42,7 +42,7 @@ func (ctrl *PrincipalsController) GetCurrentUser(c *gin.Context) {
 		internalError(err)
 		return
 	}
-	u.Path = "/users/current"
+	u.Path = "/v1/users/current"
 	req, err := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
 	if err != nil {
 		internalError(err)
