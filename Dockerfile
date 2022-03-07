@@ -5,7 +5,7 @@ RUN go mod download
 
 COPY . .
 ARG COMMITSHA
-RUN go build -ldflags "-X main.COMMITSHA=$COMMITSHA" -o cec-gw cmd/main.go
+RUN go build -ldflags "-X main.COMMITSHA=$COMMITSHA" -o cec-gw
 
 
 

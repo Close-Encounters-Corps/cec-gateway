@@ -1,0 +1,112 @@
+basePath: /api
+definitions:
+  models.AuthPhaseResult:
+    properties:
+      next_url:
+        description: next url
+        type: string
+      phase:
+        description: phase
+        type: integer
+      token:
+        description: token
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+        description: user
+    type: object
+  models.Error:
+    properties:
+      message:
+        description: message
+        type: string
+      request_id:
+        description: request id
+        type: string
+    type: object
+  models.Principal:
+    properties:
+      admin:
+        description: admin
+        type: boolean
+      created_on:
+        description: created on
+        type: string
+      id:
+        description: id
+        type: integer
+      last_login:
+        description: last login
+        type: string
+      state:
+        description: state
+        type: string
+    type: object
+  models.User:
+    properties:
+      id:
+        description: id
+        type: integer
+      principal:
+        $ref: '#/definitions/models.Principal'
+        description: principal
+    type: object
+info:
+  contact: {}
+  description: Gateway endpoint of a CEC Platform v2, serves as a proxy and one swagger
+    to rule them all. Find more at Close Encounters Corps Discord server!
+  title: CEC Gateway
+  version: 0.1.0
+paths:
+  /0/login/discord:
+    get:
+      parameters:
+      - description: 'Second phase: State to fetch from CEC Auth'
+        in: query
+        name: state
+        type: string
+      - description: URL to redirect after second phase
+        in: query
+        name: redirect_url
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.AuthPhaseResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: Authenticate using Discord
+      tags:
+      - private
+  /0/users/current:
+    get:
+      parameters:
+      - description: Authorization token
+        in: header
+        name: X-Auth-Token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: Get current user
+      tags:
+      - private
+swagger: "2.0"
