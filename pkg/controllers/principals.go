@@ -48,6 +48,7 @@ func (ctrl *PrincipalsController) GetCurrentUser(c *gin.Context) {
 		internalError(err)
 		return
 	}
+	req.Header.Add("X-Auth-Token", c.GetHeader("X-Auth-Token"))
 	resp, err := ctrl.Client.Do(req)
 	if err != nil {
 		internalError(err)
