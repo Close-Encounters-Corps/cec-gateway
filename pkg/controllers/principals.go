@@ -53,12 +53,17 @@ func (ctrl *PrincipalsController) GetCurrentUser(c *gin.Context) {
 		internalError(err)
 		return
 	}
-	if resp.StatusCode == http.StatusBadRequest {
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
 		internalError(err)
 		return
 	}
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
+	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusBadRequest {
+			c.Writer.WriteHeader(http.StatusBadRequest)
+			c.Writer.Write(body)
+			return
+		}
 		internalError(err)
 		return
 	}
