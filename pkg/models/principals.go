@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 type User struct {
 
 	// id
@@ -12,17 +14,17 @@ type User struct {
 type Principal struct {
 
 	// admin
-	Admin bool `json:"admin,omitempty"`
+	Admin bool `json:"admin"`
 
 	// created on
-	CreatedOn string `json:"created_on,omitempty"`
+	CreatedOn *time.Time `json:"created_on"`
 
 	// id
-	ID int64 `json:"id,omitempty"`
+	ID int64 `json:"id"`
 
 	// last login
-	LastLogin string `json:"last_login,omitempty"`
+	LastLogin *time.Time `json:"last_login"`
 
 	// state
-	State string `json:"state,omitempty"`
+	State string `json:"state"`
 }
